@@ -1,0 +1,302 @@
+<%inherit file="/base.html"/>
+<link href="https://magicbox.bk.tencent.com/static_api/v3/assets/bootstrap-3.3.4/css/bootstrap_noresponsive.css" rel="stylesheet">
+<link href="https://magicbox.bk.tencent.com/static_api/v3/assets/select2-3.5.2/select2.css" rel="stylesheet">
+<!-- <link href="https://magicbox.bk.tencent.com/static_api/v3/bk/css-pro/bk.css" rel="stylesheet"> -->
+<link href="https://magicbox.bk.tencent.com/static_api/v3/bk/css-pro/components/dialog.css" rel="stylesheet">
+<link href="https://magicbox.bk.tencent.com/static_api/v3/assets/bk-icon-2.0/iconfont.css" rel="stylesheet">
+<link href="https://magicbox.bk.tencent.com/static_api/v3/bk/css-pro/components/badge.css" rel="stylesheet">
+<link href="https://magicbox.bk.tencent.com/static_api/v3/assets/datatables-1.10.7/dataTables.bootstrap.css" rel="stylesheet"/>
+<%block name="content">
+<div class="king-equal-height" >
+    <div class="king-block king-block-bordered king-block-themed m20">
+    <div class="king-block-header king-info">
+        <ul class="king-block-options">
+            <li>
+                <!-- <button type="button"><i class="fa fa-cog"></i></button> -->
+            </li>
+        </ul>
+        <h3 class="king-block-title">查询参数</h3>
+    </div>
+    <div class="king-block-content">
+        <form class="form-horizontal">
+            <div class="form-group clearfix ">
+                <label class="col-sm-3 control-label bk-lh30 pt0">业务：</label>
+                <div class="col-sm-9">
+                    <select name="" id="biz_id" class="form-control bk-valign-top">
+
+                    </select>
+                </div>
+            </div>
+            <div class="form-group clearfix ">
+                <label class="col-sm-3 control-label bk-lh30 pt0">IP：</label>
+                <div class="col-sm-9">
+                    <select name="" id="ip" class="form-control bk-valign-top">
+
+                    </select>
+                </div>
+            </div>
+            <div class="form-group clearfix ">
+                <label class="col-sm-3 control-label bk-lh30 pt0">磁盘：</label>
+                <div class="col-sm-9">
+                    <input name="" id="disk" class="form-control bk-valign-top">
+                    </input>
+                </div>
+            </div>
+            <div class="form-group clearfix">
+                <div class="col-sm-9 col-sm-offset-3">
+                    <button type="button" class="king-btn mr10  king-success" onclick="search(this)">提交</button>
+                    <button type="button" class="king-btn king-default ">取消</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+</div>
+<div class="king-equal-height" >
+    <div class="king-block king-block-bordered king-block-themed m20">
+    <div class="king-block-header king-info">
+        <ul class="king-block-options">
+            <li>
+                <!-- <button type="button"><i class="fa fa-cog"></i></button> -->
+            </li>
+        </ul>
+        <h3 class="king-block-title">数据表格</h3>
+    </div>
+    <div class="container-fluid mb0 ">
+                <table id="example1" class="table table-bordered table-striped dataTable no-footer" role="grid" aria-describedby="table2_demo4_info">
+                    <thead>
+                        <tr role="row">
+                            <th class="sorting_asc" rowspan="1" colspan="1" aria-label="id">id</th>
+                            <th class="sorting" tabindex="0" aria-controls="table2_demo4" rowspan="1" colspan="1" aria-label="集群: activate to sort column ascending">集群</th>
+                            <th class="sorting" tabindex="0" aria-controls="table2_demo4" rowspan="1" colspan="1" aria-label="ip: activate to sort column ascending">ip</th>
+                            <th class="sorting" tabindex="0" aria-controls="table2_demo4" rowspan="1" colspan="1" aria-label="操作系统: activate to sort column ascending">操作系统</th>
+                            <th class="sorting" tabindex="0" aria-controls="table2_demo4" rowspan="1" colspan="1" aria-label="磁盘分区: activate to sort column ascending">磁盘分区</th>
+                            <th class="sorting" tabindex="0" aria-controls="table2_demo4" rowspan="1" colspan="1" aria-label="录入时间: activate to sort column ascending">录入时间</th>
+                            <th class="sorting" tabindex="0" aria-controls="table2_demo4" rowspan="1" colspan="1" aria-label="状态: activate to sort column ascending">状态</th>
+                            <th class="sorting" tabindex="0" aria-controls="table2_demo4" rowspan="1" colspan="1" aria-label="操作: activate to sort column ascending">操作</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        <template id="app_tpl">
+            <option value="#id#">#name#</option>
+        </template>
+
+        <template id="ip_tpl">
+            <option value="#ip#">#ip#</option>
+        </template>
+    </div>
+</div>
+</%block>
+<script src="https://magicbox.bk.tencent.com/static_api/v3/assets/select2-3.5.2/select2.js"></script>
+<script src="https://magicbox.bk.tencent.com/static_api/v3/assets/datatables-1.10.7/jquery.dataTables.js"></script>
+<script src="https://magicbox.bk.tencent.com/static_api/v3/assets/datatables-1.10.7/dataTables.bootstrap.js"></script>
+<script src="https://magicbox.bk.tencent.com/static_api/v3/assets/bkDialog-2.0/js/bkDialog.js"></script>
+<script src="${STATIC_URL}js/tanchuang.js" type="text/javascript"></script>
+<script>
+    function renderTpl(str, cfg) {
+            var re = /(#(.+?)#)/g;
+
+            return str.replace(re, function() {
+                var val = cfg[arguments[2]]+'';
+                if(typeof val == 'undefined') {
+                    val = '';
+                }
+                return val;
+            });
+        }
+    
+    /*
+    * 查询表单级联数据拉取
+    */
+    function select_ip(biz_id){
+        //级联选择ip
+        $('#ip').html('');
+        $.get('${SITE_URL}iwork/get_ip_by_bizid/', {'biz_id': biz_id}, function(data){
+                if(data.result){
+                    var _html = '';
+                    var list = data.data;
+                    var tpl = $('#ip_tpl').html();
+                    for (var i=0,len=list.length; i < len; i++){
+                        var item = list[i];
+                        _html += renderTpl(tpl, item)
+                    }
+                    $('#ip').html(_html);
+                }else{
+                    alert("获取失败")
+                }
+            }, 'json')
+        }
+
+    $(function(){
+        /*
+        * 查询表单级联数据拉取
+        */
+        $.get('${SITE_URL}iwork/get_biz_list/', function(data){
+                if(data.result){
+                    var _html = '';
+                    var list = data.data;
+                    var tpl = $('#app_tpl').html();
+                    for (var i=0,len=list.length; i < len; i++){
+                        var item = list[i];
+                        _html += renderTpl(tpl, item)
+                    }
+                    $('#biz_id').html(_html);
+
+                    var biz_id = $("#biz_id").val();
+                    select_ip(biz_id);
+                }else{
+                    alert("获取失败")
+                }
+            }, 'json')
+        
+        //业务选择下拉绑定change事件
+        $("#biz_id").change(function(){
+            var biz_id = $("#biz_id").val();
+            console.log(biz_id)
+            select_ip(biz_id);
+            //select_job(biz_id);
+        });
+    })
+
+     var language = {
+        search: '搜索：',
+        lengthMenu: "每页显示 _MENU_ 记录",
+        zeroRecords: "没找到相应的数据！",
+        info: "分页 _PAGE_ / _PAGES_",
+        infoEmpty: "暂无数据！",
+        infoFiltered: "(从 _MAX_ 条数据中搜索)",
+        paginate: {
+            first: '<<',
+            last: '>>',
+            previous: '上一页',
+            next: '下一页',
+        }
+    }
+
+    $('#example1').dataTable({
+        autowidth: false, //适应宽度
+        destroy: true,
+        paging: true, //隐藏分页
+        ordering: false, //关闭排序
+        info: false, //隐藏左下角分页信息
+        searching: false, //关闭搜索
+        lengthChange: false, //不允许用户改变表格每页显示的记录数
+        language: language, //汉化
+        data: ${host_list},
+        columns: [
+            {"data": "id"},
+            {"data": "biz"},
+            {"data": "ip"},
+            {"data": "os"},
+            {"data": "diskpath"},
+            {"data": "star_time"},
+            {
+                data: "status",
+                render: function (data, type, full, meta) {
+                    if(data == 1){
+                        return '<span class="bk-badge bk-success">运行</span>';
+                    }else{
+                       return '<span class="bk-badge bk-danger">停止</span>';
+                    }
+                }
+            },
+            {
+                data: "status",
+                orderable: false,
+                render: function (data, type, row, meta) {
+                    if(data == 1){
+                        return '<a class="king-btn king-default del" >停止</a><a class="king-btn king-default info">查看记录</a>';
+
+                    }else{
+                        return '<a class="king-btn king-default add">开始</a><a class="king-btn king-default info">查看记录</a>';
+                    }
+
+                }
+            }
+        ]
+    });
+
+
+    function search(obj){
+        var biz_id = $('#biz_id').val();
+        var ip = $('#ip').val();
+        var disk = $('#disk').val();
+        $.post('${SITE_URL}iwork/get_disk/', {'biz_id': biz_id, 'ip': ip, 'disk': disk}, function(data){
+                console.log(data)
+                if(data.result){
+                    var table = $('#example1').DataTable();
+                        table.clear();
+                        table.rows.add(data.data);
+                        table.draw(false);
+    }else{
+                    alert(data.message);
+                }
+        })
+    }
+
+    function reload_tab(data) {
+         console.log(data)
+         if(data.result){
+            var table = $('#example1').DataTable();
+                table.clear();
+                table.rows.add(data.data);
+                table.draw(false);
+         }else{
+                alert(data.message);
+            }
+    }
+
+
+    var t = $("#example1").DataTable();//获取datatables对象
+    //停止按钮绑定事件
+    $("#example1 tbody").on('click', 'a.del', function(){
+        var row = t.row( $(this).parents('tr') ),//获取按钮所在的行
+          tdata = row.data();
+        $.post(
+            '${SITE_URL}iwork/celery_task/',
+            {'id': tdata.id, 'type': 'stop'},
+            function (data) {
+                    alert(data.message);
+                    tdata['status'] = 2;
+                    row.data(tdata);
+                    t.draw();
+                })
+    });
+    //开始按钮绑定事件
+    $("#example1 tbody").on('click', 'a.add', function(){
+        var row = t.row( $(this).parents('tr') ),//获取按钮所在的行
+          tdata = row.data();
+        $.post(
+            '${SITE_URL}iwork/celery_task/',
+            {'id': tdata.id, 'type': 'star'},
+            function (data) {
+                    alert(data.message);
+                    tdata['status'] = 1;
+                    row.data(tdata);
+                    t.draw();
+                })
+    });
+
+    //查询按钮绑定时间
+    $("#example1 tbody").on('click', 'a.info', function(){
+        var row = t.row( $(this).parents('tr') ),//获取按钮所在的行
+          tdata = row.data();
+        $.post(
+            '${SITE_URL}iwork/select_celery_log/',
+            {'ip': tdata.ip},
+            function (res) {
+                if(res.result){
+                    tanchuang(res.data);
+                }else{
+                    alert(res.message);
+                }
+
+            }
+        )
+    });
+
+
+
+
+</script>

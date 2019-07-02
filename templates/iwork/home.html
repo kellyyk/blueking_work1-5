@@ -1,0 +1,32 @@
+<%inherit file="/base.html"/>
+
+<%block name="content">
+    <div class="home-page">
+    	<!-- <p>Hello World！</p> -->
+        <div class="form-inline">
+            <label for="exampleInputName2">输入框：</label>
+            <input type="text" class="form-control mr10" id="inputtext" placeholder="请输入">
+            <p id="outtext"></p>
+            <input type="button" class="king-btn king-success mr10" id="onclick" value="提交">
+        </div>
+    </div>
+
+</%block>
+
+<script>
+    $("#onclick").on("click",function () {
+        var data = $("#inputtext").val()
+        $.post(
+            '${SITE_URL}iwork/textjob/',{
+                "data":data
+            },function(data) {
+                if(data.result){
+                    $("#outtext").text(data.message)
+                }else{
+                    $("#outtext").text(data.message)
+                }
+            }
+        )
+    })
+</script>
+

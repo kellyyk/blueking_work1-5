@@ -1,0 +1,150 @@
+<%inherit file="/base.html"/>
+<link href="https://magicbox.bk.tencent.com/static_api/v3/assets/datatables-1.10.7/dataTables.bootstrap.css" rel="stylesheet"/>
+<link href="https://magicbox.bk.tencent.com/static_api/v3/assets/select2-3.5.2/select2.css" rel="stylesheet">
+<%block name="content">
+        <div class="king-page-box">
+        <div class="king-container clearfix">
+            <form class="form-horizontal" >
+                <div id="edit"></div>
+            </form>
+            <div class="container-fluid mb0 ">
+                <table id="example1" class="table table-bordered table-striped dataTable no-footer" role="grid" aria-describedby="table2_demo4_info">
+                    <thead>
+                        <tr role="row">
+                            <th class="sorting_asc" rowspan="1" colspan="1" aria-label="id">id</th>
+                            <th class="sorting" tabindex="0" aria-controls="table2_demo4" rowspan="1" colspan="1" aria-label="ip地址: activate to sort column ascending">ip地址</th>
+                            <th class="sorting" tabindex="0" aria-controls="table2_demo4" rowspan="1" colspan="1" aria-label="系统类型: activate to sort column ascending">系统类型</th>
+                            <th class="sorting" tabindex="0" aria-controls="table2_demo4" rowspan="1" colspan="1" aria-label="常用磁盘: activate to sort column ascending">常用磁盘</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+</%block>
+<script src="https://magicbox.bk.tencent.com/static_api/v3/assets/select2-3.5.2/select2.js"></script>
+<script src="https://magicbox.bk.tencent.com/static_api/v3/assets/datatables-1.10.7/jquery.dataTables.js"></script>
+<script src="https://magicbox.bk.tencent.com/static_api/v3/assets/datatables-1.10.7/dataTables.bootstrap.js"></script>
+<script>
+    if("${result}" == 'True'){
+        $("#edit").html('<div class="form-group clearfix ">\n' +
+            '                    <label class="col-sm-3 control-label bk-lh30 pt10">ip地址：</label>\n' +
+            '                    <div class="col-sm-3">\n' +
+            '                        <input type="text" class="form-control bk-valign-top" id="ipaddr" placeholder="请输入IP地址"> </div>\n' +
+            '                </div>\n' +
+            '                <div class="form-group clearfix ">\n' +
+            '                    <label class="col-sm-3 control-label bk-lh30 pt10">系统版本：</label>\n' +
+            '                    <div class="col-sm-3">\n' +
+            '                        <input class="select2-focusser select2-offscreen" type="text" aria-haspopup="true" role="button" aria-labelledby="select2-chosen-13" id="os">\n' +
+            '                    </div>\n' +
+            '                </div>\n' +
+            '                <div class="form-group clearfix ">\n' +
+            '                    <label class="col-sm-3 control-label bk-lh30 pt10">常用分区：</label>\n' +
+            '                    <div class="col-sm-3">\n' +
+            '                        <input type="text" class="form-control bk-valign-top" id="diskpath" placeholder="常用分区"> </div>\n' +
+            '                </div>\n' +
+            '                <div class="form-group clearfix">\n' +
+            '                    <div class="col-sm-3 col-sm-offset-3">\n' +
+            '                        <button type="button" class="king-btn mr10  king-success" id="onclick">提交</button>\n' +
+            '                    </div>\n' +
+            '                </div>')
+    }else {
+        $("#edit").html('<p>非管理员用户浏览记录</p>')
+    }
+
+    var ostype = [{
+        id: '1',
+        text: 'linux'
+    },{
+       id: '2',
+        text: 'windows'
+    }];
+
+    $("#os").select2({
+        data: ostype,
+         placeholder: "选择系统"
+    });
+
+    var language = {
+        search: '搜索：',
+        lengthMenu: "每页显示 _MENU_ 记录",
+        zeroRecords: "没找到相应的数据！",
+        info: "分页 _PAGE_ / _PAGES_",
+        infoEmpty: "暂无数据！",
+        infoFiltered: "(从 _MAX_ 条数据中搜索)",
+        paginate: {
+            first: '<<',
+            last: '>>',
+            previous: '上一页',
+            next: '下一页',
+        }
+    }
+
+    $('#example1').dataTable({
+        autowidth: false, //适应宽度
+        destroy: true,
+        paging: true, //隐藏分页
+        ordering: false, //关闭排序
+        info: false, //隐藏左下角分页信息
+        searching: false, //关闭搜索
+        lengthChange: false, //不允许用户改变表格每页显示的记录数
+        language: language, //汉化
+        data: ${diskdata},
+        columns: [
+            {"data": "id"},
+            {"data": "ip"},
+            {"data": "os"},
+            {"data": "diskpath"}
+        ]
+    });
+
+
+    function checkIpAddr(ipaddr) {
+        if(ipaddr == "")
+        {
+        return false;
+        }
+        var ss = ipaddr.split(".");
+        if(ss.length != 4)
+        {
+        return false;
+        }
+        var i=0;
+        for(i=0;i<ss.length;i++)
+        {
+        if ( !isNumber(ss[i]) || parseInt(ss[i]) < 0 || parseInt(ss[i])>255)
+        {
+        return false;
+        }}
+        return true;
+        };
+
+    $("#onclick").on("click",function () {
+         var ipaddr = $("#ipaddr").val();
+         var ostype = $("#os").val();
+         var diskpath = $("#diskpath").val();
+         var reg =  /^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$/;
+         if(reg.test(ipaddr)==false){
+            alert("输入IP不合法,请确认后再次提交！");
+            return false;
+         }else{
+             $.post(
+                    "${SITE_URL}iwork/diskinfo/",{
+                        'ipaddr': ipaddr,
+                        'ostype': ostype,
+                        'diskpath': diskpath
+                    },function (res) {
+                        if(res.result){
+
+                        var table = $('#example1').DataTable();
+                        table.clear();
+                        table.rows.add(res.data);
+                        table.draw(false);
+                        }else{
+                            alert(res.message)
+                        }
+                    }
+
+                )
+         }
+    });
+</script>
